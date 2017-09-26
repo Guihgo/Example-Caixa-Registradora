@@ -224,11 +224,12 @@ void criaNovaCompra() {
                     //verifica se existe o codigo no estoque e verificar se a quantidade é menor ou igual à existente no estoque;
                     if(existeEstoque(codigo, quantidade) == 1){
                         nItens++;
+                        listaProdutos = realloc(listaProdutos, (sizeof(Carrinho)*(nItens+1)));
                         //add produto no carrinho
                         listaProdutos[nItens].codigo = codigo; 
                         listaProdutos[nItens].quantidade = quantidade;
                     } else {
-                        printf("\n[Erro] - Codigo nao existe");
+                        printf("\n[Erro] - Codigo nao existe ou quantidade nao existe em estoque");
                     }
                 }
                 
@@ -245,4 +246,6 @@ void criaNovaCompra() {
                 
         }
     }
+    
+    free(listaProdutos);
 }
