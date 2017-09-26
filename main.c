@@ -22,8 +22,8 @@ typedef struct {
 
 /* Declarações de funções */
 EstoqueData * leEstoque();
-double existeEstoque(int codigo);
-//float soma(int codigo, int quantidade);
+int existeEstoque(int codigo,double quantidade);
+double soma(int codigo, double quantidade);
 //float troco(float total, float vrecebe);
 
 /* Declaracoes de metodos */
@@ -54,7 +54,7 @@ int main() {
     int a = 0;
     while(a!=1) {
         printf("\nEscolha uma opcao:");
-        printf("0 - Novo Compra\n1 - Finalizar");
+        printf("\n0 - Novo Compra\n1 - Finalizar");
         scanf("%d", &a);
         
         switch(a){
@@ -69,7 +69,7 @@ int main() {
                 printf("\nEssa opcao nao existe!\nTente novamente");
             break;
         }
-    
+    }
     return 0;
 }
 
@@ -78,9 +78,15 @@ int main() {
 /* ---------------------------------------------------*/
 /* ---------------------------------------------------*/
 
-/* Função que verifica se certo codigo existe no estoque e retorna seu preço*/
-double existeEstoque(int codigo) {
-    return 0;
+/* Função que verifica se certo codigo existe no estoque */
+int existeEstoque(int codigo, double quantidade) {
+    int flagExiste = 0;
+    for(int a=0; a<estoqueData.nLinhas; a++){
+        if(codigo == estoqueData.itensEstoque[a].codigo && quantidade <= estoqueData.itensEstoque[a].quantidade){
+            flagExiste = 1;
+        }
+    }
+    return flagExiste;
 }
 
 
@@ -161,19 +167,18 @@ EstoqueData * leEstoque() {
 }
 
 
-/*
-float soma(int codigo, int quantidade){
-    float soma = 0;
+double soma(int codigo, double quantidade){
+    double soma;
     
     for(int p=0; p<estoqueData.nLinhas; p++){
-        if(codigo == ItemEstoque.itensEstoque[p].codigo){
-            soma = soma + ItemEstoque.itensEstoque[p].preco * quantidade;
+        if(codigo == estoqueData.itensEstoque[p].codigo){
+            soma = estoqueData.itensEstoque[p].preco * quantidade;
         }
         return soma;
     }
-    
 }
 
+/*
 float troco(float total,float vrecebe){
     float valor;
     
@@ -189,38 +194,55 @@ float troco(float total,float vrecebe){
 */
 
 
-void criaNovaCompra(){
+void criaNovaCompra() {
     int a = 0;
+    int nItens = 0;
+
+    Carrinho * listaProdutos = malloc(sizeof(Carrinho));
+    
     
     while(a!=1){
         printf("\n0 - Novo Produto\n1 - Finalizar");
         scanf("%d", &a);
         switch(a){
             
-            case 0:
+            case 0:{
+                
                 int b;
                 printf("\n0 - Digitar codigo\n1 - Escanear QRcode");
                 scanf("%d", &b);
                 
                 if(b==0){
-                    int codigo, quantidade;
-                    
-                    printf("Codigo do Produto:");
+                    int codigo;
+                    double quantidade;
+                    printf("\nCodigo do Produto:");
                     scanf("%d", &codigo);
-                    printf("Quantidade");
-                    scanf("%d", &quantidade)
                     
-                    total = total + soma(codigo,quantidade);
+                    printf("\nQuantidade:");
+                    scanf("%lf", &quantidade);
+                        
+                    //verifica se existe o codigo no estoque e verificar se a quantidade é menor ou igual à existente no estoque;
+                    if(existeEstoque(codigo, quantidade) == 1){
+                        nItens++;
+                        //add produto no carrinho
+                        listaProdutos[nItens].codigo = codigo; 
+                        listaProdutos[nItens].quantidade = quantidade;
+                    } else {
+                        printf("\n[Erro] - Codigo nao existe");
+                    }
                 }
                 
                 if(b==1){
                     //deixa pra depois que td estiver pronto...
                 }
-            break;
+                break;
+            }
             
-            case 1:
+            case 1: {
                 //checkout();//total, troco, saida estoque;
-            break;
+                break; 
+            }
+                
         }
     }
 }
