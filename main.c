@@ -189,7 +189,7 @@ void criaNovaCompra() {
             case 0:{
                 
                 int b;
-                printf("\n0 - Digitar codigo\n1 - Escanear QRcode");
+                printf("\n0 - Digitar codigo\n1 - Escanear QRcode\n");
                 scanf("%d", &b);
                 
                 if(b==0){
