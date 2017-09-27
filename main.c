@@ -38,24 +38,12 @@ EstoqueData estoqueData;
 /* ---------------------------------------------------*/
 
 int main() {
-    // estoqueData = leEstoque();
     estoqueData = (*leEstoque());
     
-    // printf("\nestoqueData - main(): %d ", estoqueData);
-    // printf("\n&estoqueData - main(): %d ", &estoqueData);
-    // printf("\n*estoqueData - main(): %d ", *estoqueData);
-    
-    // printf("\n\n----Testandooo-----");
-    // for(int p=0; p<estoqueData.nLinhas; p++) {
-    //     printf("\n->Linha[%d]", p);
-    //     printf("\n   ->Codigo: %d", estoqueData.itensEstoque[p].codigo);
-    //     printf("\n   ->Descricao: %s", estoqueData.itensEstoque[p].descricao);
-    // }
- 
     int a = 0;
     while(a!=1) {
         printf("\nEscolha uma opcao:");
-        printf("\n0 - Novo Compra\n1 - Finalizar");
+        printf("\n0 - Nova Compra\n1 - Finalizar programa\n");
         scanf("%d", &a);
         
         switch(a){
@@ -90,7 +78,6 @@ int existeEstoque(int codigo, double quantidade) {
     return flagExiste;
 }
 
-
 EstoqueData * leEstoque() {
     char buffer[1024];
     char *coluna, *linha;
@@ -98,7 +85,7 @@ EstoqueData * leEstoque() {
     
     FILE *fstream = fopen("estoque.csv","r");
     if(fstream == NULL) {
-        printf("\n Erro ao abrir arquivo estoque.csv");
+        printf("\nErro ao abrir arquivo estoque.csv");
         return NULL;
     }
     
@@ -195,7 +182,7 @@ void criaNovaCompra() {
     
     
     while(a!=1){
-        printf("\n0 - Novo Produto\n1 - Finalizar");
+        printf("\n0 - Novo Produto\n1 - Finalizar compra\n");
         scanf("%d", &a);
         switch(a){
             
@@ -250,7 +237,6 @@ void checkout(int nItens, Carrinho*listaProdutos){
     
     //calcula o total e mostra o total
     for(int i=0; i<nItens; i++){
-        
         for(int j=0; j<estoqueData.nLinhas; j++) {
             if(estoqueData.itensEstoque[j].codigo==listaProdutos[i].codigo) {
                 total += estoqueData.itensEstoque[j].preco * listaProdutos[i].quantidade;
@@ -258,7 +244,6 @@ void checkout(int nItens, Carrinho*listaProdutos){
                 estoqueData.itensEstoque[j].quantidade = estoqueData.itensEstoque[j].quantidade - listaProdutos[i].quantidade;
             }
         }
-        
     }
     
     printf("\nTotal: R$%.2lf", total);
@@ -268,11 +253,12 @@ void checkout(int nItens, Carrinho*listaProdutos){
     while(tClinte<0) {
         printf("\nValor Cliente:");
         scanf("%lf", &vCliente);
-        
         tClinte = troco(total,vCliente);
         if(tClinte<0) { printf("\nAbaixo do valor total do carrinho"); }
     } 
-    printf("Troco = R$%.2lf",tClinte);
+    printf("\nTroco = R$%.2lf", tClinte);
+    
+    //printar a compra total
     
     //faz update no estoque
     updateEstoque();
