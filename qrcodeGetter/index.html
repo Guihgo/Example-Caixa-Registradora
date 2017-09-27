@@ -1,0 +1,82 @@
+<HTML>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="mobile-web-app-capable" content="yes">
+
+	<title>Nodejs Server</title>
+
+	<script src="./jquery/jquery-3.2.1.min.js"></script>
+	<link rel="stylesheet" href="./bootstrap/bootstrap.min.css">
+	
+	<script type="text/javascript" src="./instascan/instascan.min.js"></script>
+	<script type="text/javascript" src="./ionSound/ion.sound.min.js"></script>
+	<style>
+	</style>
+
+    <script type="text/javascript">
+    // init bunch of sounds
+    ion.sound({
+        sounds: [
+            {name: "scannedBeep"}
+        ],
+    
+        // main config
+        path: "audio/",
+        preload: true,
+        multiplay: true,
+        volume: 1
+    });
+    
+    $(document).ready(function() {
+        $("#sucessMsg").hide();
+        let scanner = new Instascan.Scanner({ video: document.getElementById('preview'), mirror: false, refractoryPeriod: 2000, });
+        scanner.addListener('scan', function (content) {
+            ion.sound.play("scannedBeep");
+            console.log(content);
+            //alert(content);
+            /* Manda por POST */
+            var mData = {codigo: content};
+			$.post('/setCodigo', mData, function(result) {
+	  		    console.log( "Codigo enviado com sucesso!");
+			});
+			$("#sucessMsg").show();
+			setTimeout(function(){ $("#sucessMsg").hide(); }, 1000);
+        });
+        Instascan.Camera.getCameras().then(function (cameras) {
+            if (cameras.length > 0) {
+              scanner.start(cameras[cameras.length-1]);
+            } else {
+              console.error('No cameras found.');
+            }
+        }).catch(function (e) {
+            console.error(e);
+        });
+    });
+    </script>
+
+</head>
+
+<body style="background-color: #1e1e1e;">
+	<audio id="scannedBeep" src="./audio/scannedBeep.mp3" autobuffer></audio>
+	
+	<section class="container">
+    	<div class="row">
+    	    <div class="col-md-12" style="text-align: center; margin: 0 auto; padding: 0;">
+    	        <video id="preview" width="100%" height="auto"></video>
+    	    </div>
+	    </div>
+	    
+	</section>
+	
+    <div style="position: absolute; bottom: 50px; width: 100%; text-align: center; margin: 0 auto; padding: 0;">
+        <div id="sucessMsg" class="alert alert-success" role="alert" style="width: 80%; margin: 0 auto;">QRCode SCANEADO !</div>
+    </div>
+	    
+    <script type="text/javascript">
+
+    </script>
+
+</body>
+</HTML>
