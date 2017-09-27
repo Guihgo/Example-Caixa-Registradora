@@ -12,14 +12,17 @@ int main() {
     // printf("\n%d", &pp);
     // printf("\n%d", **pp);
     
-    int * a = malloc(sizeof(int));
-    a = realloc(a,1);
-    a[0] = 69;
-    a[1] = 45;
-    a[2] = 89;
-    a[3] = 22;
-    a[60] = 69;
-    printf("\na : %d", a[60]);
+    FILE *fstream = fopen("estoqueReplica.csv","w");
+    if(fstream == NULL) {
+        printf("\n Erro ao abrir arquivo estoqueReplica.csv");
+        return -1;
+    }
+    int a = 65;
+    char t[20] = "comida";
+    double b = 12;
+    fprintf(fstream, "%d;%s\n", a,t);
+    fprintf(fstream, "%d;%s;%.2lf\n", a,t,b);
+    fclose(fstream);
     
     return 0;
 }

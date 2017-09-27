@@ -23,11 +23,12 @@ typedef struct {
 /* Declarações de funções */
 EstoqueData * leEstoque();
 int existeEstoque(int codigo,double quantidade);
-double soma(int codigo, double quantidade);
-//float troco(float total, float vrecebe);
+double troco(double total, double vCliente);
 
 /* Declaracoes de metodos */
 void criaNovaCompra();
+void checkout(int nItens, Carrinho*listaProdutos);
+void updateEstoque();
 
 /* Variaveis globais */
 EstoqueData estoqueData;
@@ -166,33 +167,25 @@ EstoqueData * leEstoque() {
     return pEstoqueData;
 }
 
-
-double soma(int codigo, double quantidade){
-    double soma;
+void updateEstoque() {
     
-    for(int p=0; p<estoqueData.nLinhas; p++){
-        if(codigo == estoqueData.itensEstoque[p].codigo){
-            soma = estoqueData.itensEstoque[p].preco * quantidade;
-        }
-        return soma;
+    FILE *fstream = fopen("estoque.csv","w");
+    if(fstream == NULL) {
+        printf("\n Erro ao abrir arquivo estoqueReplica.csv");
+        return;
     }
+    
+    for(int i=0; i<estoqueData.nLinhas; i++) {
+        ItemEstoque itemEstoque = estoqueData.itensEstoque[i];
+        fprintf(fstream, "%d;%s;%.3lf;%.2lf\n", itemEstoque.codigo,itemEstoque.descricao,itemEstoque.quantidade,itemEstoque.preco);
+    }
+    
+    fclose(fstream);
 }
 
-/*
-float troco(float total,float vrecebe){
-    float valor;
-    
-    if(vrecebe < total){
-        printf("Faltando dinheiro");
-    }
-        else{
-            valor = vrecebe - total;
-        }
-    return valor;
+double troco(double total,double vCliente){
+    return vCliente-total;
 }
-
-*/
-
 
 void criaNovaCompra() {
     int a = 0;
@@ -223,24 +216,24 @@ void criaNovaCompra() {
                         
                     //verifica se existe o codigo no estoque e verificar se a quantidade é menor ou igual à existente no estoque;
                     if(existeEstoque(codigo, quantidade) == 1){
-                        nItens++;
                         listaProdutos = realloc(listaProdutos, (sizeof(Carrinho)*(nItens+1)));
                         //add produto no carrinho
                         listaProdutos[nItens].codigo = codigo; 
                         listaProdutos[nItens].quantidade = quantidade;
+                        nItens++;
                     } else {
                         printf("\n[Erro] - Codigo nao existe ou quantidade nao existe em estoque");
                     }
                 }
                 
-                if(b==1){
+                if(b==1){ //escanear
                     //deixa pra depois que td estiver pronto...
                 }
                 break;
             }
             
             case 1: {
-                //checkout();//total, troco, saida estoque;
+                checkout(nItens,listaProdutos);//total, troco, saida estoque;
                 break; 
             }
                 
@@ -249,3 +242,40 @@ void criaNovaCompra() {
     
     free(listaProdutos);
 }
+
+void checkout(int nItens, Carrinho*listaProdutos){
+    
+    double vCliente;
+    double total=0;
+    
+    //calcula o total e mostra o total
+    for(int i=0; i<nItens; i++){
+        
+        for(int j=0; j<estoqueData.nLinhas; j++) {
+            if(estoqueData.itensEstoque[j].codigo==listaProdutos[i].codigo) {
+                total += estoqueData.itensEstoque[j].preco * listaProdutos[i].quantidade;
+                //faz saida no estoque dentro do programa
+                estoqueData.itensEstoque[j].quantidade = estoqueData.itensEstoque[j].quantidade - listaProdutos[i].quantidade;
+            }
+        }
+        
+    }
+    
+    printf("\nTotal: R$%.2lf", total);
+    
+    //pegunta quanto o cliente pagou e mostra o troco do cliente
+    double tClinte = -1; //troco do cliente
+    while(tClinte<0) {
+        printf("\nValor Cliente:");
+        scanf("%lf", &vCliente);
+        
+        tClinte = troco(total,vCliente);
+        if(tClinte<0) { printf("\nAbaixo do valor total do carrinho"); }
+    } 
+    printf("Troco = R$%.2lf",tClinte);
+    
+    //faz update no estoque
+    updateEstoque();
+    
+}
+
