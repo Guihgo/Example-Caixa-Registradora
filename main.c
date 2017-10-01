@@ -24,6 +24,7 @@ typedef struct {
 EstoqueData * leEstoque();
 int existeEstoque(int codigo,double quantidade);
 double troco(double total, double vCliente);
+int getScannedCodigo();
 
 /* Declaracoes de metodos */
 void criaNovaCompra();
@@ -180,46 +181,73 @@ void criaNovaCompra() {
 
     Carrinho * listaProdutos = malloc(sizeof(Carrinho));
     
+    //Limpa arquivo compraFeita
+    FILE * file = fopen("qrcodeGetter/compraFeita.csv", "w");
+    fprintf(file, "\n");
+    fclose(file);
     
     while(a!=1){
         printf("\n0 - Novo Produto\n1 - Finalizar compra\n");
         scanf("%d", &a);
         switch(a){
             
-            case 0:{
+            case 0:{ //Novo produto
                 
                 int b;
                 printf("\n0 - Digitar codigo\n1 - Escanear QRcode\n");
                 scanf("%d", &b);
                 
+                int codigo;
+                double quantidade;
+                
                 if(b==0){
-                    int codigo;
-                    double quantidade;
                     printf("\nCodigo do Produto:");
                     scanf("%d", &codigo);
-                    
-                    printf("\nQuantidade:");
-                    scanf("%lf", &quantidade);
-                        
-                    //verifica se existe o codigo no estoque e verificar se a quantidade é menor ou igual à existente no estoque;
-                    if(existeEstoque(codigo, quantidade) == 1){
-                        listaProdutos = realloc(listaProdutos, (sizeof(Carrinho)*(nItens+1)));
-                        //add produto no carrinho
-                        listaProdutos[nItens].codigo = codigo; 
-                        listaProdutos[nItens].quantidade = quantidade;
-                        nItens++;
-                    } else {
-                        printf("\n[Erro] - Codigo nao existe ou quantidade nao existe em estoque");
-                    }
                 }
                 
                 if(b==1){ //escanear
-                    //deixa pra depois que td estiver pronto...
+                    //int tempCodigo = getScannedCodigo();
+                    
+                    //Limpa arquivo codigo
+                    FILE * fileCodigo = fopen("qrcodeGetter/codigo.txt", "w");
+                    fprintf(fileCodigo, "%d\n", -1);
+                    fclose(fileCodigo);
+                
+                    printf("\nPronto para scanear...");
+                    codigo = -1;
+                    //Fica lendo arquivo codigo
+                    while(codigo == -1){
+                        codigo = getScannedCodigo();
+                    }
+                }
+                
+                printf("\nCodigo: %d", codigo);
+                printf("\nQuantidade:");
+                scanf("%lf", &quantidade);
+                
+                //verifica se existe o codigo no estoque e verificar se a quantidade é menor ou igual à existente no estoque;
+                if(existeEstoque(codigo, quantidade) == 1){
+                    listaProdutos = realloc(listaProdutos, (sizeof(Carrinho)*(nItens+1)));
+                    //add produto no carrinho
+                    listaProdutos[nItens].codigo = codigo; 
+                    listaProdutos[nItens].quantidade = quantidade;
+                    
+                    FILE * file = fopen("qrcodeGetter/compraFeita.csv", "w");
+                    for(int a=0; a<estoqueData.nLinhas; a++){
+                        if(codigo == estoqueData.itensEstoque[a].codigo){
+                            fprintf(file,"%s;%.3lf;%.2lf",estoqueData.itensEstoque[a].descricao,quantidade,estoqueData.itensEstoque[a].preco);
+                        }
+                    }
+                    fclose(file);
+                    nItens++;
+                    printf("\n[INFO] - Produto adicionado a compra com sucesso\n");
+                } else {
+                    printf("\n[Erro] - Codigo nao existe ou quantidade nao existe em estoque");
                 }
                 break;
             }
             
-            case 1: {
+            case 1: { //Finaliza compra
                 checkout(nItens,listaProdutos);//total, troco, saida estoque;
                 break; 
             }
@@ -263,5 +291,18 @@ void checkout(int nItens, Carrinho*listaProdutos){
     //faz update no estoque
     updateEstoque();
     
+    printf("\n[INFO] - Compra realizada com sucesso!\n");
 }
 
+int getScannedCodigo() {
+    int codigo;
+    FILE * scanner = fopen("qrcodeGetter/codigo.txt","r"); // ler o arquivo gerado pelo QRcode
+    if(scanner==NULL){ // verifica se o arquivo existe
+        printf("\nErro ao abrir o arquivo qrcodeGetter/codigo.txt");
+        return -1;
+    }
+    
+    fscanf(scanner,"%d", &codigo);
+    fclose(scanner);
+    return codigo;
+}

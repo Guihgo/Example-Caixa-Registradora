@@ -1,6 +1,5 @@
 /*
  * Autor: Guihgo
- * Data: 20/09/2017
 */
 
 var express = require('express');
