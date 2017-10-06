@@ -5,10 +5,15 @@
 var express = require('express');
 var path = require('path');
 var app = express();
-var server = require('http').createServer(app); //cria servidor http utilizando express como intermediador
-var bodyParser = require('body-parser');
 var fs = require('fs');
-server.listen(process.env.PORT || 80); //inicia servidor http na porta 80
+var bodyParser = require('body-parser');
+
+const httpsOptions = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem')
+}
+var server = require('https').createServer(httpsOptions, app); //cria servidor http utilizando express como intermediador
+server.listen(80); //inicia servidor http na porta 80
 var SocketIo = require('socket.io')(server);
 
 
@@ -28,7 +33,7 @@ app.post('/setCodigo', function(req, res) {
         if(err) {
             return console.log(err);
         }
-    
+
         console.log("O codigo "+req.body.codigo+" foi salvo");
     });
     res.send({msg:'ok'});
@@ -44,32 +49,36 @@ fs.watch('./compraFeita.csv', (eventType, filename) => {
       }
       if(oldCompraFeita != data.toString()) {
         //console.log("Asynchronous read: \n", data.toString());
-        var itensComprados = [];
+        var isNovaCompra = false;
         data.toString().split("\n").forEach(function(linha, iLinha){
             var item = {
                 descricao: "",
                 quantidade: 0,
                 valor: 0
             };
-            itensComprados.push(item);
             linha.split(";").forEach(function(coluna, iColuna){
                 switch(iColuna) {
                 case 0:
-                    itensComprados[iLinha].descricao = coluna;
+                    item.descricao = coluna;
                     break;
                 case 1:
-                    itensComprados[iLinha].quantidade = coluna;
+                    item.quantidade = coluna;
                     break;
                 case 2:
-                    itensComprados[iLinha].valor = coluna;
+                    item.valor = coluna;
                     break;
                 default:
                     break;
                 }
             });
+            console.log(item.descricao.length);
+            if(item.descricao=="" || item.descricao=="\n" ||item.descricao=="\l" || item.descricao.length<=1){
+              isNovaCompra=true;
+            }
+            if(item.descricao.length!=0) {
+              SocketIo.sockets.emit('compraFeita', {"itemComprado": item, "isNovaCompra":isNovaCompra});
+            }    
         });
-        var isNovaCompra = (itensComprados[0].descricao=="") ? true:false;
-        SocketIo.sockets.emit('compraFeita', {"itensComprados": itensComprados, "isNovaCompra":isNovaCompra});
       }
       oldCompraFeita = data.toString();
     });
@@ -78,10 +87,10 @@ fs.watch('./compraFeita.csv', (eventType, filename) => {
 
 SocketIo.sockets.on('connection', function(socket){ //quando houver uma nova conexão
     console.log('Um client conectou');
-    
+
 	//socket.emit('postMsg', {msg: theMsg}); //envia a msg para o socket que acabou de conectar
     //SocketIo.sockets.emit('nUsersOnline', {nUsersOnline: connections.length});
-    
+
 	//OnDisconect - quando um socket desconectar
 	socket.on('disconnect', function(data) { //quando desconectar
 		console.log('Um client desconectou... ', data);
