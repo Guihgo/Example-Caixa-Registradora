@@ -187,7 +187,7 @@ void criaNovaCompra() {
     fclose(file);
     
     while(a!=1){
-        printf("\n0 - Novo Produto\n1 - Finalizar compra\n");
+        printf("\n0 - Novo Produto\n1 - Finalizar compra\n2 - Remover Produto");
         scanf("%d", &a);
         switch(a){
             
@@ -220,7 +220,7 @@ void criaNovaCompra() {
                         codigo = getScannedCodigo();
                     }
                 }
-                
+
                 printf("\nCodigo: %d", codigo);
                 printf("\nQuantidade:");
                 scanf("%lf", &quantidade);
@@ -250,6 +250,50 @@ void criaNovaCompra() {
             case 1: { //Finaliza compra
                 checkout(nItens,listaProdutos);//total, troco, saida estoque;
                 break; 
+            }
+            
+            case 2: { //Remover produto
+                int b;
+                printf("\n0 - Digitar codigo\n1 - Escanear QRcode\n");
+                scanf("%d", &b);
+                
+                int codigo;
+                
+                if(b==0){
+                    printf("\nCodigo do Produto:");
+                    scanf("%d", &codigo);
+                }
+                
+                if(b==1){ //escanear
+                    //Limpa arquivo codigo
+                    FILE * fileCodigo = fopen("qrcodeGetter/codigo.txt", "w");
+                    fprintf(fileCodigo, "%d\n", -1);
+                    fclose(fileCodigo);
+                
+                    printf("\nPronto para scanear...");
+                    codigo = -1;
+                    //Fica lendo arquivo codigo
+                    while(codigo == -1){
+                        codigo = getScannedCodigo();
+                    }
+                }
+                
+                //cancelar o item no carrinho (codigo = -1)
+                for(int i=0; i<nItens; i++) {
+                    if(listaProdutos[i].codigo==codigo) {
+                        listaProdutos[i].codigo = -1; //cancela o item no carrinho
+                    }
+                }
+                
+                //avisa para o nodejs que removeu um codigo
+                FILE * file = fopen("qrcodeGetter/compraFeita.csv", "w");
+                
+                for(int a=0; a<estoqueData.nLinhas; a++){
+                    if(codigo == estoqueData.itensEstoque[a].codigo){
+                        fprintf(file,"%d;[-]%s;%.3lf;%.2lf",codigo,estoqueData.itensEstoque[a].descricao,quantidade,estoqueData.itensEstoque[a].preco);
+                    }
+                }
+                fclose(file);
             }
                 
         }

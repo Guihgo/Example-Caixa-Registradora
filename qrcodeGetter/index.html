@@ -72,17 +72,27 @@
 								ion.sound.play("dotMatrixPrinter");
 								var item = data.itemComprado;
 
-								console.log(item.descricao);
+        
+								console.log(item.descricao); 
 								var subTotal = (item.quantidade*item.valor);
-								htmlItem += '<tr>'+
-								'<th class="center">'+(item.descricao)+'</th>'+
-								'<th class="center">R$'+item.valor+'</th>'+
-								'<th class="center">'+item.quantidade+'</th>'+
-								'<th class="center">R$'+subTotal.toFixed(2)+'</th>'+
-								'</tr>';
-								total += subTotal;
-								$("#tItensComprados").html(htmlItem);
-								$("#total").html('R$'+total.toFixed(2));
+								if(item.descricao.indexOf("[-]")>=0) { //eh pra cancelar o item
+						            //tira o item da pagina
+						            $("#id_"+item.codigo).hide();
+						            
+						            total -= subTotal;
+						            $("#total").html('R$'+total.toFixed(2));
+								} else { //eh pra add item
+    								htmlItem += '<tr id="id_'+item.codigo+'">'+
+    								'<th class="center">'+(item.descricao)+'</th>'+
+    								'<th class="center">R$'+item.valor+'</th>'+
+    								'<th class="center">'+item.quantidade+'</th>'+
+    								'<th class="center">R$'+subTotal.toFixed(2)+'</th>'+
+    								'</tr>';
+    								total += subTotal;
+    								$("#tItensComprados").html(htmlItem);
+    								$("#total").html('R$'+total.toFixed(2));
+								}
+							
 							}
 						});
         });

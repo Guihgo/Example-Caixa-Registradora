@@ -52,19 +52,24 @@ fs.watch('./compraFeita.csv', (eventType, filename) => {
         var isNovaCompra = false;
         data.toString().split("\n").forEach(function(linha, iLinha){
             var item = {
+                codigo: 0,
                 descricao: "",
                 quantidade: 0,
                 valor: 0
             };
+      
             linha.split(";").forEach(function(coluna, iColuna){
                 switch(iColuna) {
                 case 0:
+                  item.codigo = coluna;
+                  break;
+                case 1:
                     item.descricao = coluna;
                     break;
-                case 1:
+                case 2:
                     item.quantidade = coluna;
                     break;
-                case 2:
+                case 3:
                     item.valor = coluna;
                     break;
                 default:
