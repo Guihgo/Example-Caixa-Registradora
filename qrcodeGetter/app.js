@@ -77,10 +77,16 @@ fs.watch('./compraFeita.csv', (eventType, filename) => {
                 }
             });
             console.log(item.descricao.length);
+/*
             if(item.descricao=="" || item.descricao=="\n" ||item.descricao=="\l" || item.descricao.length<=1){
               isNovaCompra=true;
             }
-            if(item.descricao.length!=0) {
+*/
+			console.log("indexOf : " + data.toString().indexOf("[NOVA_COMPRA]"));
+			if(data.toString().indexOf("[NOVA_COMPRA]")>=0) {
+				isNovaCompra=true;
+			}				
+            if(item.descricao.length!=0 || isNovaCompra==true) {
               SocketIo.sockets.emit('compraFeita', {"itemComprado": item, "isNovaCompra":isNovaCompra});
             }    
         });

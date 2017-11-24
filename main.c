@@ -103,7 +103,7 @@ EstoqueData * leEstoque() {
     }
     //printf("nLinhas: %d", nLinhas);
     
-    ItemEstoque * itensEstoque = calloc(nLinhas, sizeof(ItemEstoque));
+    ItemEstoque * itensEstoque = (ItemEstoque*) calloc(nLinhas, sizeof(ItemEstoque));
     
     if(!itensEstoque) {
         printf("\n Banco de dados muito grande para a máquina");
@@ -179,11 +179,11 @@ void criaNovaCompra() {
     int a = 0;
     int nItens = 0;
 
-    Carrinho * listaProdutos = malloc(sizeof(Carrinho));
+    Carrinho * listaProdutos = (Carrinho*)malloc(sizeof(Carrinho));
     
     //Limpa arquivo compraFeita
     FILE * file = fopen("qrcodeGetter/compraFeita.csv", "w");
-    fprintf(file, "\n");
+    fprintf(file, "[NOVA_COMPRA]\n");
     fclose(file);
     
     while(a!=1){
@@ -227,7 +227,7 @@ void criaNovaCompra() {
                 
                 //verifica se existe o codigo no estoque e verificar se a quantidade é menor ou igual à existente no estoque;
                 if(existeEstoque(codigo, quantidade) == 1){
-                    listaProdutos = realloc(listaProdutos, (sizeof(Carrinho)*(nItens+1)));
+                    listaProdutos = (Carrinho*) realloc(listaProdutos, (sizeof(Carrinho)*(nItens+1)));
                     //add produto no carrinho
                     listaProdutos[nItens].codigo = codigo; 
                     listaProdutos[nItens].quantidade = quantidade;
@@ -235,7 +235,7 @@ void criaNovaCompra() {
                     FILE * file = fopen("qrcodeGetter/compraFeita.csv", "w");
                     for(int a=0; a<estoqueData.nLinhas; a++){
                         if(codigo == estoqueData.itensEstoque[a].codigo){
-                            fprintf(file,"%s;%.3lf;%.2lf",estoqueData.itensEstoque[a].descricao,quantidade,estoqueData.itensEstoque[a].preco);
+                            fprintf(file,"%d;%s;%.3lf;%.2lf",codigo,estoqueData.itensEstoque[a].descricao,quantidade,estoqueData.itensEstoque[a].preco);
                         }
                     }
                     fclose(file);
@@ -258,7 +258,7 @@ void criaNovaCompra() {
                 scanf("%d", &b);
                 
                 int codigo;
-                
+                double quantidade;
                 if(b==0){
                     printf("\nCodigo do Produto:");
                     scanf("%d", &codigo);
@@ -281,6 +281,7 @@ void criaNovaCompra() {
                 //cancelar o item no carrinho (codigo = -1)
                 for(int i=0; i<nItens; i++) {
                     if(listaProdutos[i].codigo==codigo) {
+						quantidade = listaProdutos[i].quantidade;
                         listaProdutos[i].codigo = -1; //cancela o item no carrinho
                     }
                 }

@@ -1,3 +1,3 @@
-g++ main.c -o caixareg.exe
-caixareg.exe
+g++ main.c -o caixaregistradora.exe
+caixaregistradora.exe
 PAUSE
